@@ -5,8 +5,8 @@
     "dataset": "waterbirds",
     "trainer": "cfix",
     "self_supervised": false,
-    "target_attr": "Object",
-    "bias_attrs": ["Place"],
+    "target_attr": "Place",
+    "bias_attrs": ["Object"],
     "k": 8,
     "desc": "eval"
 }

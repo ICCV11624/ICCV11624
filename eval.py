@@ -12,8 +12,8 @@ from tqdm import tqdm
 import numpy as np
 
 CHECKPOINT_ROOT = Path('/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/')
-config_debug = Path('./configurations/debug_celebA_cfix_eval.json')
-
+config_debug = Path('./configurations/eval_cfix_waterbirds.json')
+import gdown
 
 def test(model, loaders):
     model.eval()
@@ -49,6 +49,21 @@ def test(model, loaders):
 
     return acc1, avg_acc, worst_acc
 
+def load_model(model, config):
+
+    
+    f_checkpoint = '/homes/gcapitani/ICCV11624/best_avg_acc_cfix.pth'
+
+    # same as the above, and you can copy-and-paste a URL from Google Drive with fuzzy=True
+    #url = "https://drive.google.com/file/d/13ooFQ4Vpk3OXxLt9S8ZxDL-ap6louHFt/view?usp=share_link"
+    #gdown.download(url=url, output=f_checkpoint, quiet=False, fuzzy=True)
+    
+    checkpoint = torch.load(f_checkpoint)
+    model.load_state_dict(checkpoint['state_dict']) # Set CUDA before if error occurs.
+    model.eval()
+
+    return model
+
 def main():
 
     config = load_config(config_debug)
@@ -78,7 +93,8 @@ def main():
         if config["dataset"] == 'celebA':
             config['path_model'] = '/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/celebA/self/backbone.pt'
         else:
-            raise ValueError('Dataset not supported')
+            config['path_model'] = ''
+
         
         model_args = {
             "name": config['arch'],
@@ -92,10 +108,8 @@ def main():
         #Model setup and optimizer config
         model = ModelFactory.create(**model_args).cuda()
         model = nn.DataParallel(model)
-        path_model= '/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/celebA/Double_Chin/run6/best_worst_acc_cfix.pth'
-        checkpoint = torch.load(path_model)
-        model.load_state_dict(checkpoint['state_dict']) # Set CUDA before if error occurs.
 
+        model = load_model(model, config)
         acc1, avg_acc, worst_acc = test(model, loaders)
 
         print('Overall: {:.2f} Unbiased Average Acc: {:.2f} Unbiased Worst Acc: {:.2f}'.format(acc1, avg_acc, worst_acc))
