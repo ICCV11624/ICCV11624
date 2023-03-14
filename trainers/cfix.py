@@ -122,10 +122,7 @@ class CfixTrainer():
             targets['test'] = loaders['test'].dataset.attr[:, target_index]
 
         elif self.args['dataset'] == 'waterbirds':
-            if self.args['self_supervised']:
-                r_self = '/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/Barlow_twins/waterbirds/lightning_logs/version_3'
-            else:
-                r_self = '/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/Imagenet/waterbirds/lightning_logs/version_1'
+            r_self = '/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/Imagenet/waterbirds/lightning_logs/version_1'
 
             targets['train_eval'] = torch.tensor(loaders['train_eval'].dataset.labels)
             targets['valid'] = torch.tensor(loaders['valid'].dataset.labels)
