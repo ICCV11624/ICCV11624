@@ -7,19 +7,54 @@ from utils.config import load_config
 from utils.transforms import *
 #from model import Model
 from pathlib import Path
-from factory.factory import ModelFactory, TrainerFactory, DataLoaderFactory, TransformFactory
-
+from factory.factory import ModelFactory, DataLoaderFactory
+from tqdm import tqdm
+import numpy as np
 
 CHECKPOINT_ROOT = Path('/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/')
-config_debug = Path('./configurations/debug_waterbirds_cfix_eval.json')
+config_debug = Path('./configurations/debug_celebA_cfix_eval.json')
+
+
+def test(model, loaders):
+    model.eval()
+    test_envs = ['valid', 'test']
+        
+    for desc in test_envs:
+        with torch.no_grad():
+            loader = loaders[desc]
+            total_top1, total_top5, total_num, test_bar = 0.0, 0.0, 0, tqdm(loader, ncols=100)
+            num_groups = loader.dataset.num_groups
+            
+            bias_counts = torch.zeros(num_groups).cuda(non_blocking=True)
+            bias_top1s = torch.zeros(num_groups).cuda(non_blocking=True)
+        
+            for data, target, biases, group, ids in test_bar:
+                data, target, biases, group = data.cuda(non_blocking=True), target.cuda(non_blocking=True), biases.cuda(non_blocking=True), group.cuda(non_blocking=True)
+                B = target.size(0)
+                results = model(data, target)
+
+                logits = results['out_original']
+                pred_labels = logits.argsort(dim=-1, descending=True)
+                top1s = (pred_labels[:, :1] == target.unsqueeze(dim=-1)).squeeze().unsqueeze(0)
+                group_indices = (group==torch.arange(num_groups).unsqueeze(1).long().cuda())
+                bias_counts += group_indices.sum(1)
+                bias_top1s += (top1s * group_indices).sum(1)
+                total_num += B
+                total_top1 += torch.sum((pred_labels[:, :1] == target.unsqueeze(dim=-1)).any(dim=-1).float()).item()
+                total_top5 += torch.sum((pred_labels[:, :5] == target.unsqueeze(dim=-1)).any(dim=-1).float()).item()
+                acc1 = total_top1 / total_num * 100
+                bias_accs = bias_top1s / bias_counts * 100
+                avg_acc = np.nanmean(bias_accs.cpu().numpy())
+                worst_acc = np.nanmin(bias_accs.cpu().numpy())
+
+    return acc1, avg_acc, worst_acc
 
 def main():
 
     config = load_config(config_debug)
     #SETUP
     torch.backends.cudnn.benchmark = True
-    n_cpus = int(os.cpu_count())
-    start_epoch = 1
+    n_cpus = int(os.environ["SLURM_CPUS_PER_TASK"])
 
     if config["dataset"] == 'celebA':
         DATA_ROOT = Path('/nas/softechict-nas-2/gcapitani/')
@@ -42,8 +77,6 @@ def main():
 
         if config["dataset"] == 'celebA':
             config['path_model'] = '/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/celebA/self/backbone.pt'
-        elif config["dataset"] == 'waterbirds':
-            config['path_model'] = '/nas/softechict-nas-2/gcapitani/Barlow_twins/waterbirds/backbone.pt'
         else:
             raise ValueError('Dataset not supported')
         
@@ -59,21 +92,13 @@ def main():
         #Model setup and optimizer config
         model = ModelFactory.create(**model_args).cuda()
         model = nn.DataParallel(model)
-        path_model= '/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/waterbirds/Receding_Hairline/runf=imag_i=imag_k8_b256_beta0,01/best_worst_acc_cfix.pth'
+        path_model= '/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/celebA/Double_Chin/run6/best_worst_acc_cfix.pth'
         checkpoint = torch.load(path_model)
         model.load_state_dict(checkpoint['state_dict']) # Set CUDA before if error occurs.
 
-        optimizer = optim.Adam(model.parameters(), lr=config["lr"], weight_decay=config["weight_decay"])
-            
-        trainer = TrainerFactory.create('cfix', config, model, loaders, optimizer, num_classes, config['t'], config['beta'])
-        trainer.set_checkpoint_dir(checkpoint_dir)
-        trainer.clustering()
+        acc1, avg_acc, worst_acc = test(model, loaders)
 
-        trainer.test(epoch=1)
-
-        with open(os.path.join(checkpoint_dir,'results.txt'), 'w') as f:
-            f.write('best_avg_accuracy:'+ str(trainer.test_best_avg_acc)+ "\n")
-            f.write('best_worst_accuracy:'+ str(trainer.test_best_worst)+ "\n")
+        print('Overall: {:.2f} Unbiased Average Acc: {:.2f} Unbiased Worst Acc: {:.2f}'.format(acc1, avg_acc, worst_acc))
 
 if __name__ == "__main__":
     main()

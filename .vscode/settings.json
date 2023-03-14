@@ -1,6 +1,6 @@
 {
     "files.autoSave": "afterDelay",
     "terminal.integrated.automationProfile.linux": {
-        "path": "/homes/gcapitani/clusterFix/bash.sh"
+        "path": "/homes/gcapitani/ICCV11624/bash.sh"
     }
 }
