@@ -1,0 +1,20 @@
+{
+    "feature_dim": 512,
+    "lr": 1e-4,
+    "batch_size": 256,
+    "max_epoch": 2,
+    "dataset": "waterbirds",
+    "arch": "ResNet18",
+    "trainer": "cfix",
+    "self_supervised": false,
+    "target_attr": "Object",
+    "bias_attrs": ["Place"],
+    "k": 8,
+    "desc": "debug",
+    "weight_decay": 1e-2,
+    "momentum": 0.3,
+    "optim": "adam",
+    "scheduler_T_max": 100,
+    "t": 1,
+    "beta": 0.01
+}
