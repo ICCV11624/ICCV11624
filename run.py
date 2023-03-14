@@ -11,7 +11,7 @@ from factory.factory import ModelFactory, TrainerFactory, DataLoaderFactory, Tra
 
 
 CHECKPOINT_ROOT = Path('/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/')
-config_debug = Path('./configurations/debug_waterbirds_cfix.json')
+config_debug = Path('./configurations/run_waterbirds_cfix.json')
 
 def main():
 

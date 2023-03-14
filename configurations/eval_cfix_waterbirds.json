@@ -8,5 +8,5 @@
     "target_attr": "Object",
     "bias_attrs": ["Place"],
     "k": 8,
-    "desc": "debug"
+    "desc": "eval"
 }
