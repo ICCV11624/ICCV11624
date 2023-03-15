@@ -7,11 +7,14 @@
     "trainer": "cfix",
     "target_attr": "Double_Chin",
     "bias_attrs": ["Male"],
-    "desc": "run",
+    "self_supervised": true,
+    "desc": "debug",
     "weight_decay": 1e-2,
     "momentum": 0.3,
     "optim": "adam",
     "scheduler_T_max": 100,
     "t": 1,
-    "beta": 0.5
+    "beta": 0.5,
+    "data_root": "/nas/softechict-nas-2/gcapitani/",
+    "checkpoint_dir": "/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/"
 }

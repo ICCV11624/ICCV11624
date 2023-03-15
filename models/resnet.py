@@ -99,7 +99,10 @@ class ResNet18Cfix(nn.Module):
         if self.self_supervised:
             resnet = torchvision.models.resnet18(zero_init_residual=True)
             backbone = nn.Sequential(*list(resnet.children())[:-1])
-            backbone = torch.load(path_model)
+            if path_model is None:
+                return backbone
+            else:
+                backbone = torch.load(path_model)
             return backbone
         else:
             return torchvision.models.resnet18(pretrained=True)

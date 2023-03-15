@@ -10,10 +10,9 @@ from pathlib import Path
 from factory.factory import ModelFactory, DataLoaderFactory
 from tqdm import tqdm
 import numpy as np
-
-CHECKPOINT_ROOT = Path('/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/')
-config_debug = Path('./configurations/eval_cfix_waterbirds.json')
 import gdown
+
+config_debug = Path('./configurations/eval_cfix_celebA.json')
 
 def test(model, loaders):
     model.eval()
@@ -50,16 +49,53 @@ def test(model, loaders):
     return acc1, avg_acc, worst_acc
 
 def load_model(model, config):
+    #Cfix models from Google Drive 
+    f_checkpoint = '/mnt/beegfs/homes/gcapitani/ICCV11624/'+config["target_attr"]+".pth"
+    if config["dataset"]=='celebA':
+        if config["target_attr"]=='Wearing_Necklace':
+            #url = "https://drive.google.com/file/d/15WK10DXZlt9xGXkGzl8HUxY2voP-MC34/view?usp=share_link"
+            pass
+            #f_checkpoint = gdown.download(url=url, output = f_checkpoint, quiet=False, fuzzy=True)
+        if config["target_attr"]=='Double_Chin':
+            url = ""
+            gdown.download(url=url, output=f_checkpoint, quiet=False, fuzzy=True)
+        if config["target_attr"]=='Pale_skin':
+            url = ""
+            gdown.download(url=url, output=f_checkpoint, quiet=False, fuzzy=True)
+        if config["target_attr"]=='Wearing_Hat':
+            url = ""
+            gdown.download(url=url, output=f_checkpoint, quiet=False, fuzzy=True)
+        if config["target_attr"]=='Chubby':
+            url = ""
+            gdown.download(url=url, output=f_checkpoint, quiet=False, fuzzy=True)
+        if config["target_attr"]=='Wavy_Hair':
+            url = ""
+            gdown.download(url=url, output=f_checkpoint, quiet=False, fuzzy=True)
+        if config["target_attr"]=='Big_Lips':
+            url = "https://drive.google.com/file/d/1JBTDz7hnoppgDS98ubiVSLWyguuniluO/view?usp=share_link"
+            gdown.download(url=url, output=f_checkpoint, quiet=False, fuzzy=True)
+        if config["target_attr"]=='Bangs':
+            url = ""
+            gdown.download(url=url, output=f_checkpoint, quiet=False, fuzzy=True)
+        if config["target_attr"]=='Receding_Hairline':
+            url = ""
+            gdown.download(url=url, output=f_checkpoint, quiet=False, fuzzy=True)
+        if config["target_attr"]=='Brown_Hair':
+            url = ""
+            gdown.download(url=url, output=f_checkpoint, quiet=False, fuzzy=True)
+    elif config["dataset"]=='waterbirds':
+        if config["target_attr"]=='Object':
+            url = "https://drive.google.com/file/d/15WK10DXZlt9xGXkGzl8HUxY2voP-MC34/view?usp=share_link"
+            f_checkpoint = gdown.download(url=url, output=f_checkpoint, quiet=False, fuzzy=True)
 
-    
-    f_checkpoint = '/homes/gcapitani/ICCV11624/best_avg_acc_cfix.pth'
-
-    # same as the above, and you can copy-and-paste a URL from Google Drive with fuzzy=True
-    #url = "https://drive.google.com/file/d/13ooFQ4Vpk3OXxLt9S8ZxDL-ap6louHFt/view?usp=share_link"
-    #gdown.download(url=url, output=f_checkpoint, quiet=False, fuzzy=True)
+        if config["target_attr"]=='Place':
+            url = "https://drive.google.com/file/d/13ooFQ4Vpk3OXxLt9S8ZxDL-ap6louHFt/view?usp=share_link"
+            f_checkpoint = gdown.download(url=url, output=f_checkpoint, quiet=False, fuzzy=True)        
     
     checkpoint = torch.load(f_checkpoint)
-    model.load_state_dict(checkpoint['state_dict']) # Set CUDA before if error occurs.
+    model.load_state_dict(checkpoint['state_dict'])
+    #checkpoint = torch.load(f_checkpoint)
+    
     model.eval()
 
     return model
@@ -70,16 +106,7 @@ def main():
     #SETUP
     torch.backends.cudnn.benchmark = True
     n_cpus = int(os.environ["SLURM_CPUS_PER_TASK"])
-
-    if config["dataset"] == 'celebA':
-        DATA_ROOT = Path('/nas/softechict-nas-2/gcapitani/')
-    elif config["dataset"] == 'waterbirds':
-        DATA_ROOT = Path('/nas/softechict-nas-2/gcapitani/waterbird_complete95_forest2water2/')
-
-    checkpoint_dir = CHECKPOINT_ROOT / config["dataset"] / config["target_attr"] / config["desc"]
-    if not checkpoint_dir.exists():
-        checkpoint_dir.mkdir(parents=True, exist_ok=True)
-    config["checkpoint_dir"] = checkpoint_dir
+    DATA_ROOT = config['data_root']
 
     # CFIX CODE
     if config["trainer"] == 'cfix':
@@ -90,19 +117,13 @@ def main():
                                                  num_workers=n_cpus, configs=config)  
         num_classes = 2
 
-        if config["dataset"] == 'celebA':
-            config['path_model'] = '/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/celebA/self/backbone.pt'
-        else:
-            config['path_model'] = ''
-
-        
         model_args = {
             "name": config['arch'],
             "feature_dim": config['feature_dim'],
             "num_classes": num_classes,
             "pseudo_dim": config['k'], 
             "self_supervised": config['self_supervised'],
-            "path_model" : config['path_model']
+            "path_model" : None
         }
         
         #Model setup and optimizer config

@@ -7,11 +7,13 @@
     "trainer": "erm",
     "target_attr": "Object",
     "bias_attrs": ["Place"],
-    "desc": "run",
+    "desc": "debug",
     "weight_decay": 1e-2,
     "momentum": 0.3,
     "optim": "adam",
     "scheduler_T_max": 100,
     "t": 1,
-    "beta": 0.01
+    "beta": 0.01,
+    "data_root": "/nas/softechict-nas-2/gcapitani/waterbird_complete95_forest2water2/",
+    "checkpoint_dir": "/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/"
 }

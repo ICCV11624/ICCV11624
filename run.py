@@ -9,9 +9,7 @@ from utils.transforms import *
 from pathlib import Path
 from factory.factory import ModelFactory, TrainerFactory, DataLoaderFactory, TransformFactory
 
-
-CHECKPOINT_ROOT = Path('/mnt/beegfs/work/H2020DeciderFicarra/gcapitani/')
-config_debug = Path('./configurations/run_waterbirds_cfix.json')
+config_debug = Path('./configurations/run_cfix_waterbirds.json')
 
 def main():
 
@@ -20,13 +18,9 @@ def main():
     torch.backends.cudnn.benchmark = True
     n_cpus = int(os.environ["SLURM_CPUS_PER_TASK"])
     start_epoch = 1
+    DATA_ROOT = config['data_root']
 
-    if config["dataset"] == 'celebA':
-        DATA_ROOT = Path('/nas/softechict-nas-2/gcapitani/')
-    elif config["dataset"] == 'waterbirds':
-        DATA_ROOT = Path('/nas/softechict-nas-2/gcapitani/waterbird_complete95_forest2water2/')
-
-    checkpoint_dir = CHECKPOINT_ROOT / config["dataset"] / config["target_attr"] / config["desc"]
+    checkpoint_dir = Path(config["checkpoint_dir"]) / config["dataset"] / config["target_attr"] / config["desc"]
     if not checkpoint_dir.exists():
         checkpoint_dir.mkdir(parents=True, exist_ok=True)
     config["checkpoint_dir"] = checkpoint_dir

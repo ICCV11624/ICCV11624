@@ -5,8 +5,9 @@
     "dataset": "waterbirds",
     "trainer": "cfix",
     "self_supervised": false,
-    "target_attr": "Place",
-    "bias_attrs": ["Object"],
+    "target_attr": "Object",
+    "bias_attrs": ["Place"],
     "k": 8,
-    "desc": "eval"
+    "desc": "eval",
+    "data_root": "/nas/softechict-nas-2/gcapitani/waterbird_complete95_forest2water2/"
 }
