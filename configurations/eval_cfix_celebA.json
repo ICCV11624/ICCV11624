@@ -1,0 +1,14 @@
+{
+    "feature_dim": 512,
+    "lr": 1e-4,
+    "batch_size": 256,
+    "dataset": "celebA",
+    "trainer": "cfix",
+    "self_supervised": true,
+    "target_attr": "Bangs",
+    "bias_attrs": ["Male"],
+    "k": 8,
+    "desc": "eval",
+    "data_root": "./",
+    "checkpoint_root": "./"
+}

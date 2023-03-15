@@ -1,0 +1,14 @@
+{
+    "feature_dim": 512,
+    "lr": 1e-4,
+    "batch_size": 256,
+    "dataset": "waterbirds",
+    "trainer": "cfix",
+    "self_supervised": false,
+    "target_attr": "Object",
+    "bias_attrs": ["Place"],
+    "k": 8,
+    "desc": "eval",
+    "data_root": "./",
+    "checkpoint_root": "./"
+}

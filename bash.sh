@@ -1,0 +1,1 @@
+srun -Q --immediate=10 --cpus-per-task=4 --partition=dev --gres=gpu:1 --time 60:00 --pty bash

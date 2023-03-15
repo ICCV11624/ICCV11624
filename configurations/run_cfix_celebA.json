@@ -1,0 +1,21 @@
+{
+    "feature_dim": 512,
+    "lr": 1e-4,
+    "batch_size": 256,
+    "max_epoch": 100,
+    "dataset": "celebA",
+    "trainer": "cfix",
+    "target_attr": "Double_Chin",
+    "bias_attrs": ["Male"],
+    "self_supervised": true,
+    "desc": "debug",
+    "weight_decay": 1e-2,
+    "momentum": 0.3,
+    "optim": "adam",
+    "scheduler_T_max": 100,
+    "t": 1,
+    "beta": 0.5,
+    "k": 8,
+    "data_root": "./",
+    "checkpoint_root": "./"
+}
